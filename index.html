@@ -13,637 +13,400 @@
     --text: #f4f4f6;
     --text-muted: #8a8a96;
     --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
-    --glow-r: 180;
-    --glow-g: 160;
-    --glow-b: 200;
+    --accent: #00d4ff;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; transition: background 0.6s var(--ease); }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-  
-  /* Анимация появления видео в поиске */
-  @keyframes searchResultAppear {
-    0% { opacity: 0; transform: scale(1.5) translateY(-20px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-  }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
   /* ── Top Bar ── */
   .topbar {
-    height: 54px; background: rgba(15, 15, 18, 0.95); border-bottom: 1px solid var(--glass-border);
-    display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 100;
+    height: 60px; background: rgba(10, 10, 12, 0.85); border-bottom: 1px solid var(--glass-border);
+    display: flex; align-items: center; padding: 0 24px; gap: 20px; z-index: 100;
     backdrop-filter: blur(12px); position: sticky; top: 0;
   }
-  .logo { font-weight: 800; font-size: 18px; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s; }
-  .logo:hover { transform: scale(1.05); }
-  .logo span { background: var(--text); color: #000; padding: 2px 7px; border-radius: 4px; font-size: 10px; }
+  .logo { font-weight: 800; font-size: 20px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s; }
+  .logo:hover { transform: scale(1.03); }
+  .logo span { background: var(--text); color: #000; padding: 3px 8px; border-radius: 5px; font-size: 11px; }
   
-  .search-wrap { flex: 1; max-width: 580px; margin: 0 auto; position: relative; }
+  .search-wrap { flex: 1; max-width: 600px; margin: 0 auto; position: relative; }
   .search-wrap input {
-    width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-    border-radius: 24px; padding: 10px 18px; color: var(--text); font-size: 14px; outline: none; transition: all 0.3s var(--ease);
+    width: 100%; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border);
+    border-radius: 24px; padding: 12px 20px; color: var(--text); font-size: 15px; outline: none; transition: all 0.3s var(--ease);
   }
-  .search-wrap input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); box-shadow: 0 0 12px rgba(255,255,255,0.1); }
+  .search-wrap input:focus { border-color: var(--accent); background: rgba(255,255,255,0.09); box-shadow: 0 0 15px rgba(0,212,255,0.15); }
   .search-wrap button {
-    position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
     background: rgba(255,255,255,0.1); border: none; color: var(--text);
-    padding: 7px 14px; border-radius: 16px; cursor: pointer; font-size: 13px; transition: all 0.2s var(--ease);
+    padding: 8px 16px; border-radius: 18px; cursor: pointer; font-size: 14px; transition: all 0.2s var(--ease);
   }
   .search-wrap button:hover { background: rgba(255,255,255,0.2); transform: translateY(-50%) scale(1.05); }
 
   /* ── Main Layout ── */
-  .main-container {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
+  .main-scroll {
+    flex: 1; overflow-y: auto; padding: 24px;
+    scroll-behavior: smooth;
   }
 
-  /* ── Content Area ── */
-  .content-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    transition: all 0.5s var(--ease);
+  /* ── Category Sections ── */
+  .category-section {
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeInUp 0.6s var(--ease) forwards;
+  }
+  .category-title {
+    font-size: 22px; font-weight: 700; margin-bottom: 16px; padding-left: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .category-title span { font-size: 24px; }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
   }
 
-  /* ── Search Results Page ── */
-  .search-results {
-    display: none;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  .search-results.active { display: block; animation: fadeIn 0.3s var(--ease); }
-  
-  .search-results-header {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  .search-results-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 5px;
-  }
-  .search-results-count {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .search-result-item {
-    display: flex;
-    gap: 16px;
-    padding: 12px;
-    margin-bottom: 12px;
+  .video-card {
     background: var(--glass);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
+    border-radius: 14px;
+    overflow: hidden;
     cursor: pointer;
     transition: all 0.3s var(--ease);
     opacity: 0;
-    animation: searchResultAppear 0.2s var(--ease) forwards;
+    transform: translateY(20px) scale(0.92);
+    animation: fadeInUp 0.4s var(--ease) forwards;
   }
-  .search-result-item:hover {
+  .video-card:hover {
     background: var(--glass-hover);
-    transform: translateX(5px);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
     border-color: rgba(255,255,255,0.15);
   }
+
+  .card-thumb {
+    width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; background: #111;
+  }
+  .card-thumb img {
+    width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s var(--ease);
+  }
+  .video-card:hover .card-thumb img { transform: scale(1.08); }
   
-  .search-result-item.animating {
-    animation: searchResultAppear 0.2s var(--ease) forwards;
+  .card-badge {
+    position: absolute; top: 10px; left: 10px; padding: 4px 8px;
+    border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fff;
+    backdrop-filter: blur(4px);
+  }
+  .card-duration {
+    position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8);
+    padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;
   }
 
-  .search-thumbnail {
-    width: 240px;
-    height: 135px;
-    border-radius: 8px;
-    overflow: hidden;
-    flex-shrink: 0;
-    position: relative;
+  .card-info { padding: 14px; }
+  .card-title {
+    font-size: 15px; font-weight: 600; margin-bottom: 6px; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .search-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s var(--ease);
-  }
-  .search-result-item:hover .search-thumbnail img {
-    transform: scale(1.05);
-  }
-  .search-duration {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.8);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .platform-tag {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #fff;
-  }
+  .card-meta { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
 
-  .search-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  /* ── Player Page ── */
+  .player-page {
+    display: none; max-width: 1300px; margin: 0 auto; width: 100%;
   }
-  .search-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .search-meta {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-  }
-  .search-desc {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+  .player-page.active { display: flex; gap: 24px; animation: fadeInUp 0.4s var(--ease); }
 
-  /* ── Video Player Page ── */
-  .video-player-page {
-    display: none;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-    width: 100%;
+  .player-main { flex: 1; min-width: 0; }
+  .video-frame-wrap {
+    width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative;
   }
-  .video-player-page.active { display: flex; gap: 24px; animation: fadeIn 0.4s var(--ease); }
+  .video-frame-wrap iframe { width: 100%; height: 100%; border: none; }
 
-  .player-section {
-    flex: 1;
-    min-width: 0;
+  .video-info-box {
+    margin-top: 20px; padding: 20px; background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 14px;
   }
-
-  .video-container {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: #000;
-    border-radius: 16px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 20px 80px rgba(0,0,0,0.7);
-  }
+  .video-info-box h1 { font-size: 20px; margin-bottom: 12px; }
+  .video-stats { display: flex; gap: 16px; color: var(--text-muted); font-size: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--glass-border); }
   
-  .video-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
-  .video-details {
-    margin-top: 20px;
-    padding: 20px;
-    background: var(--glass);
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
-  }
-  .video-details h1 {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  .video-stats {
-    display: flex;
-    gap: 16px;
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  .video-actions {
-    display: flex;
-    gap: 12px;
-  }
+  .action-bar { display: flex; gap: 12px; flex-wrap: wrap; }
   .action-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s var(--ease);
-    font-size: 14px;
+    display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    border-radius: 24px; cursor: pointer; transition: all 0.2s var(--ease); font-size: 14px; color: var(--text);
   }
-  .action-btn:hover {
-    background: rgba(255,255,255,0.1);
-    transform: scale(1.05);
-  }
-  .action-btn.active {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.3);
-  }
+  .action-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.04); }
+  .action-btn:active { transform: scale(0.96); }
+  .action-btn.active { background: rgba(0,212,255,0.15); border-color: var(--accent); color: var(--accent); }
 
-  /* ── Sidebar (Related Videos) ── */
-  .sidebar {
-    width: 400px;
-    flex-shrink: 0;
-    display: none;
-  }
-  .sidebar.active { display: block; animation: slideIn 0.4s var(--ease); }
+  /* ── Sidebar (Related) ── */
+  .sidebar { width: 380px; flex-shrink: 0; display: none; }
+  .sidebar.active { display: block; animation: fadeInUp 0.5s var(--ease) 0.1s both; }
+  .sidebar-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
   
-  .sidebar-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--glass-border);
+  .related-item {
+    display: flex; gap: 12px; padding: 10px; margin-bottom: 10px;
+    background: var(--glass); border: 1px solid var(--glass-border); border-radius: 10px;
+    cursor: pointer; transition: all 0.25s var(--ease);
+  }
+  .related-item:hover { background: var(--glass-hover); transform: translateX(-4px); }
+  .rel-thumb { width: 160px; height: 90px; border-radius: 6px; overflow: hidden; flex-shrink: 0; }
+  .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .rel-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .rel-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rel-meta { font-size: 11px; color: var(--text-muted); }
+
+  /* ── Utils ── */
+  .hidden { display: none !important; }
+  .debug-banner {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(255,100,100,0.15); border: 1px solid rgba(255,100,100,0.3);
+    padding: 10px 20px; border-radius: 10px; font-size: 12px; color: #ffaaaa;
+    backdrop-filter: blur(8px); z-index: 200; text-align: center;
   }
 
-  .related-video {
-    display: flex;
-    gap: 12px;
-    padding: 10px;
-    margin-bottom: 8px;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s var(--ease);
-  }
-  .related-video:hover {
-    background: var(--glass-hover);
-    transform: translateX(-5px);
-    border-color: rgba(255,255,255,0.15);
-  }
-  
-  .related-thumb {
-    width: 168px;
-    height: 94px;
-    border-radius: 6px;
-    overflow: hidden;
-    flex-shrink: 0;
-    position: relative;
-  }
-  .related-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .related-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .related-title {
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 4px;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .related-meta {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
-  /* ── Placeholder (Home) ── */
-  .placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    color: var(--text-muted);
-    gap: 20px;
-  }
-  .placeholder-icon {
-    width: 80px;
-    height: 80px;
-    opacity: 0.3;
-  }
-  .placeholder-text {
-    font-size: 18px;
-    color: var(--text-muted);
-  }
-
-  /* ── Animations for buttons ── */
-  .btn-interactive {
-    transition: all 0.2s var(--ease);
-  }
-  .btn-interactive:hover {
-    transform: scale(1.05);
-  }
-  .btn-interactive:active {
-    transform: scale(0.95);
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 1200px) {
-    .sidebar { width: 350px; }
-    .search-thumbnail { width: 200px; height: 112px; }
-  }
-  @media (max-width: 968px) {
-    .video-player-page.active { flex-direction: column; }
+  @media (max-width: 1024px) {
+    .player-page.active { flex-direction: column; }
     .sidebar { width: 100%; }
-    .search-thumbnail { width: 168px; height: 94px; }
   }
 </style>
 </head>
 <body>
 
 <nav class="topbar">
-  <div class="logo" onclick="showHome()">None<span>Search</span></div>
+  <div class="logo" onclick="goHome()">None<span>Search</span></div>
   <div class="search-wrap">
-    <input type="text" id="searchInput" placeholder="Поиск по YouTube, Dailymotion, Rutube...">
-    <button id="searchBtn" class="btn-interactive">🔍</button>
+    <input type="text" id="searchInput" placeholder="Поиск видео по всем платформам...">
+    <button id="searchBtn">🔍</button>
   </div>
 </nav>
 
-<div class="main-container">
-  <div class="content-area">
-    
-    <!-- Home/Placeholder -->
-    <div id="homePage" class="placeholder">
-      <svg class="placeholder-icon" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-      </svg>
-      <div class="placeholder-text">Введите запрос для поиска видео</div>
-    </div>
+<div class="main-scroll" id="mainScroll">
+  <!-- Категории -->
+  <div id="categoriesView"></div>
 
-    <!-- Search Results -->
-    <div id="searchResults" class="search-results">
-      <div class="search-results-header">
-        <div class="search-results-title" id="searchTitle">Результаты поиска</div>
-        <div class="search-results-count" id="searchCount">0 видео найдено</div>
+  <!-- Плеер -->
+  <div id="playerView" class="player-page">
+    <div class="player-main">
+      <div class="video-frame-wrap">
+        <iframe id="videoFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
-      <div id="resultsList"></div>
-    </div>
-
-    <!-- Video Player -->
-    <div id="videoPlayer" class="video-player-page">
-      <div class="player-section">
-        <div class="video-container">
-          <iframe id="videoFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <div class="video-info-box">
+        <h1 id="pTitle">Загрузка...</h1>
+        <div class="video-stats">
+          <span id="pChannel">Канал</span>
+          <span id="pViews">0 просмотров</span>
+          <span id="pPlatform">Платформа</span>
         </div>
-        <div class="video-details">
-          <h1 id="playerTitle">Название видео</h1>
-          <div class="video-stats">
-            <span id="playerChannel">Канал</span>
-            <span id="playerViews">0 просмотров</span>
-            <span id="playerDate">Сегодня</span>
-          </div>
-          <div class="video-actions">
-            <button class="action-btn btn-interactive" id="likeBtn">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
-              <span id="likeCount">0</span>
-            </button>
-            <button class="action-btn btn-interactive" id="dislikeBtn">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="transform:rotate(180deg)"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
-            </button>
-            <button class="action-btn btn-interactive" id="shareBtn">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-              Поделиться
-            </button>
-            <button class="action-btn btn-interactive" id="saveBtn">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
-              Сохранить
-            </button>
-          </div>
+        <div class="action-bar">
+          <button class="action-btn" id="btnLike"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg> Нравится</button>
+          <button class="action-btn" id="btnShare"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg> Поделиться</button>
+          <button class="action-btn" id="btnSave"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg> Сохранить</button>
         </div>
       </div>
-      
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-title">Похожие видео</div>
-        <div id="relatedList"></div>
-      </aside>
     </div>
-
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Похожие видео</div>
+      <div id="relatedList"></div>
+    </aside>
   </div>
 </div>
 
+<div id="debugBanner" class="debug-banner hidden">⚠️ Бэкенд недоступен. Используется демо-режим. Проверьте <code>API_URL</code> в консоли (F12).</div>
+
 <script>
 // ═══════════════════════════════════════
-//  ⚠️ ЗАМЕНИТЕ НА ВАШ БЭКЕНД!
+//  ⚠️ ВСТАВЬТЕ СЮДА ВАШ REAL URL ИЗ RAILWAY
+//  Пример: 'https://video-search-backend-production.up.railway.app'
 // ═══════════════════════════════════════
 const API_URL = 'https://your-backend.railway.app';
 
-let currentVideo = null;
-let searchResultsData = [];
-let likeState = false;
-let saveState = false;
+let allVideosCache = [];
+let isDemoMode = false;
 
-// ── Navigation ──
-function showHome() {
-  document.getElementById('homePage').style.display = 'flex';
-  document.getElementById('searchResults').classList.remove('active');
-  document.getElementById('videoPlayer').classList.remove('active');
-  document.getElementById('sidebar').classList.remove('active');
-  document.getElementById('searchInput').value = '';
-}
-
-function showSearch() {
-  document.getElementById('homePage').style.display = 'none';
-  document.getElementById('videoPlayer').classList.remove('active');
-  document.getElementById('searchResults').classList.add('active');
-}
-
-function showVideo(video, relatedVideos = []) {
-  currentVideo = video;
-  document.getElementById('homePage').style.display = 'none';
-  document.getElementById('searchResults').classList.remove('active');
-  document.getElementById('videoPlayer').classList.add('active');
-  document.getElementById('sidebar').classList.add('active');
+// ── Mock Data Generator (Работает сразу без бэкенда) ──
+function generateMockVideos(count, platformFilter = 'mix') {
+  const platforms = platformFilter === 'rutube' ? ['Rutube'] : ['YouTube', 'Rutube', 'Dailymotion'];
+  const movies = ['Интерстеллар', 'Начало', 'Матрица', 'Дюна', 'Бегущий по лезвию 2049', 'Оппенгеймер', 'Побег из Шоушенка', 'Темный рыцарь'];
+  const games = ['Cyberpunk 2077', 'Elden Ring', 'GTA VI трейлер', 'Minecraft обновление', 'CS2 турнир', 'Dota 2 финал', 'Zelda Tears of the Kingdom', 'Starfield обзор'];
+  const music = ['Lo-Fi Hip Hop', 'Synthwave Mix', 'Classical Piano', 'Rock Legends', 'Jazz Cafe', 'EDM Festival', 'Acoustic Covers', 'Metal Core'];
   
-  // Update player
-  document.getElementById('playerTitle').textContent = video.title;
-  document.getElementById('playerChannel').textContent = video.channel;
-  document.getElementById('playerViews').textContent = video.views || '0 просмотров';
-  
-  // Load video iframe (hide YouTube controls with controls=0)
-  let embedUrl = '';
-  if (video.platform === 'YouTube') {
-    const urlParams = new URLSearchParams(new URL(video.url).search);
-    const videoId = urlParams.get('v');
-    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0`;
-  } else if (video.platform === 'Dailymotion') {
-    const parts = video.url.split('/');
-    const videoId = parts[parts.length - 1];
-    embedUrl = `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1`;
-  } else if (video.platform === 'Rutube') {
-    const cleanId = video.url.split('/').filter(Boolean).pop();
-    embedUrl = `https://rutube.ru/play/embed/${cleanId}?autoplay=1`;
+  const data = [];
+  for(let i=0; i<count; i++) {
+    const plat = platforms[Math.floor(Math.random()*platforms.length)];
+    const cat = Math.random() > 0.6 ? movies : Math.random() > 0.5 ? games : music;
+    const title = cat[Math.floor(Math.random()*cat.length)] + ` #${Math.floor(Math.random()*100)}`;
+    data.push({
+      id: `mock-${plat}-${i}`,
+      platform: plat,
+      color: plat === 'YouTube' ? '#ff0033' : plat === 'Rutube' ? '#00a651' : '#00aaff',
+      title: title,
+      channel: ['КиноПоиск', 'GamePro', 'MusicVibe', 'TechReview', 'CinemaHub'][Math.floor(Math.random()*5)],
+      views: `${Math.floor(Math.random()*900)+10}K просмотров`,
+      time: `${Math.floor(Math.random()*59)}:${Math.floor(Math.random()*59).toString().padStart(2,'0')}`,
+      thumbnail: `https://picsum.photos/seed/${plat}${i}/400/225`,
+      url: plat === 'YouTube' ? `https://youtube.com/watch?v=dQw4w9WgXcQ` : `https://rutube.ru/video/${Math.random().toString(36).substring(7)}/`
+    });
   }
-  
-  document.getElementById('videoFrame').src = embedUrl;
-  
-  // Load related videos
-  loadRelatedVideos(relatedVideos);
-  
-  // Reset buttons
-  likeState = false;
-  saveState = false;
-  updateActionButtons();
+  return data;
 }
 
-// ── Search ──
-async function doSearch() {
-  const query = document.getElementById('searchInput').value.trim();
-  if (!query) return;
-  
-  showSearch();
-  document.getElementById('searchTitle').textContent = `Результаты: "${query}"`;
-  document.getElementById('resultsList').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Загрузка...</div>';
-  
+// ── API Fetch с фолбэком ──
+async function fetchVideos(query, filter = 'mix') {
   try {
-    const response = await fetch(`${API_URL}/api/search`, {
+    const res = await fetch(`${API_URL}/api/search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
     });
-    
-    if (!response.ok) throw new Error('Ошибка');
-    const data = await response.json();
-    searchResultsData = data.videos || [];
-    
-    document.getElementById('searchCount').textContent = `${searchResultsData.length} видео найдено`;
-    renderSearchResults(searchResultsData);
-    
-  } catch (err) {
-    document.getElementById('resultsList').innerHTML = '<div style="text-align:center;padding:40px;color:#ff6b6b">❌ Ошибка подключения к бэкенду</div>';
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    let videos = data.videos || [];
+    if (filter === 'rutube') videos = videos.filter(v => v.platform === 'Rutube');
+    return videos;
+  } catch (e) {
+    console.warn('Backend error:', e);
+    document.getElementById('debugBanner').classList.remove('hidden');
+    isDemoMode = true;
+    return generateMockVideos(12, filter);
   }
 }
 
-function renderSearchResults(videos) {
-  const container = document.getElementById('resultsList');
+// ── Render Categories ──
+async function renderCategories() {
+  const container = document.getElementById('categoriesView');
   container.innerHTML = '';
   
-  videos.forEach((video, index) => {
-    const item = document.createElement('div');
-    item.className = 'search-result-item';
-    item.style.animationDelay = `${index * 0.1}s`; // Stagger animation
-    
-    const duration = video.time || '';
-    
-    item.innerHTML = `
-      <div class="search-thumbnail">
-        <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/240x135/1a1a1f/666?text=No+Preview'">
-        ${duration ? `<span class="search-duration">${duration}</span>` : ''}
-        <span class="platform-tag" style="background:${video.color}">${video.platform}</span>
-      </div>
-      <div class="search-info">
-        <div class="search-title">${video.title}</div>
-        <div class="search-meta">${video.channel} • ${video.views || '0 просмотров'}</div>
-        <div class="search-desc">${video.desc || 'Описание видео...'}</div>
-      </div>
-    `;
-    
-    item.addEventListener('click', () => {
-      // Find related videos (exclude current)
-      const related = searchResultsData.filter(v => v.id !== video.id).slice(0, 8);
-      showVideo(video, related);
-    });
-    
-    container.appendChild(item);
-    
-    // Trigger animation
-    setTimeout(() => item.classList.add('animating'), index * 100);
-  });
-}
+  const cats = [
+    { id: 'rec', title: '🔥 Рекомендации', query: 'популярное', filter: 'mix' },
+    { id: 'movies', title: '🎬 Фильмы', query: 'фильмы', filter: 'rutube' },
+    { id: 'games', title: '🎮 Игры', query: 'игры', filter: 'mix' },
+    { id: 'music', title: '🎵 Музыка', query: 'музыка', filter: 'mix' }
+  ];
 
-// ── Related Videos ──
-function loadRelatedVideos(videos) {
-  const container = document.getElementById('relatedList');
-  container.innerHTML = '';
-  
-  if (!videos.length) {
-    container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px">Нет похожих видео</div>';
-    return;
+  for (const cat of cats) {
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    section.innerHTML = `<div class="category-title"><span>${cat.title.split(' ')[0]}</span> ${cat.title.split(' ').slice(1).join(' ')}</div><div class="video-grid" id="grid-${cat.id}"></div>`;
+    container.appendChild(section);
+    
+    const videos = await fetchVideos(cat.query, cat.filter);
+    allVideosCache = [...allVideosCache, ...videos];
+    
+    const grid = document.getElementById(`grid-${cat.id}`);
+    videos.forEach((v, i) => {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      card.style.animationDelay = `${i * 0.08}s`;
+      card.innerHTML = `
+        <div class="card-thumb">
+          <img src="${v.thumbnail}" alt="${v.title}" loading="lazy">
+          <span class="card-badge" style="background:${v.color}">${v.platform}</span>
+          <span class="card-duration">${v.time || 'LIVE'}</span>
+        </div>
+        <div class="card-info">
+          <div class="card-title">${v.title}</div>
+          <div class="card-meta"><span>${v.channel}</span><span>${v.views}</span></div>
+        </div>
+      `;
+      card.onclick = () => openPlayer(v, videos.filter(x => x.id !== v.id).slice(0,8));
+      grid.appendChild(card);
+    });
   }
+}
+
+// ── Player Logic ──
+function openPlayer(video, related) {
+  document.getElementById('categoriesView').classList.add('hidden');
+  const pv = document.getElementById('playerView');
+  pv.classList.add('active');
+  document.getElementById('sidebar').classList.add('active');
   
-  videos.forEach(video => {
-    const item = document.createElement('div');
-    item.className = 'related-video btn-interactive';
-    item.innerHTML = `
-      <div class="related-thumb">
-        <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/168x94/1a1a1f/666?text=No+Preview'">
-      </div>
-      <div class="related-info">
-        <div class="related-title">${video.title}</div>
-        <div class="related-meta">${video.channel}</div>
-        <div class="related-meta">${video.views || ''}</div>
-      </div>
+  document.getElementById('pTitle').textContent = video.title;
+  document.getElementById('pChannel').textContent = video.channel;
+  document.getElementById('pViews').textContent = video.views;
+  document.getElementById('pPlatform').textContent = video.platform;
+  
+  // Embed URL with hidden controls
+  let embed = '';
+  if (video.platform === 'YouTube') {
+    const id = new URL(video.url).searchParams.get('v');
+    embed = `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&rel=0&disablekb=1`;
+  } else if (video.platform === 'Rutube') {
+    const id = video.url.split('/').filter(Boolean).pop();
+    embed = `https://rutube.ru/play/embed/${id}?autoplay=1`;
+  } else {
+    const id = video.url.split('/').pop();
+    embed = `https://www.dailymotion.com/embed/video/${id}?autoplay=1`;
+  }
+  document.getElementById('videoFrame').src = embed;
+  
+  // Related
+  const relList = document.getElementById('relatedList');
+  relList.innerHTML = '';
+  related.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'related-item';
+    div.innerHTML = `
+      <div class="rel-thumb"><img src="${r.thumbnail}" loading="lazy"></div>
+      <div class="rel-info"><div class="rel-title">${r.title}</div><div class="rel-meta">${r.channel} • ${r.views}</div></div>
     `;
-    item.addEventListener('click', () => {
-      const newRelated = searchResultsData.filter(v => v.id !== video.id).slice(0, 8);
-      showVideo(video, newRelated);
-    });
-    container.appendChild(item);
+    div.onclick = () => openPlayer(r, related.filter(x => x.id !== r.id).slice(0,8));
+    relList.appendChild(div);
   });
-}
-
-// ── Action Buttons ──
-function updateActionButtons() {
-  const likeBtn = document.getElementById('likeBtn');
-  const saveBtn = document.getElementById('saveBtn');
   
-  likeBtn.classList.toggle('active', likeState);
-  saveBtn.classList.toggle('active', saveState);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.getElementById('likeBtn').addEventListener('click', function() {
-  likeState = !likeState;
-  updateActionButtons();
-});
+function goHome() {
+  document.getElementById('playerView').classList.remove('active');
+  document.getElementById('sidebar').classList.remove('active');
+  document.getElementById('categoriesView').classList.remove('hidden');
+  document.getElementById('videoFrame').src = '';
+}
 
-document.getElementById('dislikeBtn').addEventListener('click', function() {
-  likeState = false;
-  updateActionButtons();
-});
+// ── Search ──
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  
+  const results = await fetchVideos(q, 'mix');
+  allVideosCache = results;
+  
+  const container = document.getElementById('categoriesView');
+  container.innerHTML = `<div class="category-section" style="animation-delay:0s"><div class="category-title">🔍 Результаты: "${q}"</div><div class="video-grid" id="searchGrid"></div></div>`;
+  
+  const grid = document.getElementById('searchGrid');
+  results.forEach((v, i) => {
+    const card = document.createElement('div');
+    card.className = 'video-card';
+    card.style.animationDelay = `${i * 0.06}s`;
+    card.innerHTML = `
+      <div class="card-thumb"><img src="${v.thumbnail}" loading="lazy"><span class="card-badge" style="background:${v.color}">${v.platform}</span></div>
+      <div class="card-info"><div class="card-title">${v.title}</div><div class="card-meta"><span>${v.channel}</span><span>${v.views}</span></div></div>
+    `;
+    card.onclick = () => openPlayer(v, results.filter(x => x.id !== v.id).slice(0,8));
+    grid.appendChild(card);
+  });
+  
+  document.getElementById('playerView').classList.remove('active');
+  document.getElementById('sidebar').classList.remove('active');
+  container.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-document.getElementById('shareBtn').addEventListener('click', function() {
-  navigator.clipboard?.writeText(window.location.href);
-  this.classList.add('active');
-  setTimeout(() => this.classList.remove('active'), 1500);
-});
+// ── Events ──
+document.getElementById('searchBtn').onclick = doSearch;
+document.getElementById('searchInput').onkeypress = e => { if(e.key==='Enter') doSearch(); };
+document.getElementById('btnLike').onclick = function() { this.classList.toggle('active'); };
+document.getElementById('btnShare').onclick = function() { navigator.clipboard?.writeText(window.location.href); this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),1500); };
+document.getElementById('btnSave').onclick = function() { this.classList.toggle('active'); };
 
-document.getElementById('saveBtn').addEventListener('click', function() {
-  saveState = !saveState;
-  updateActionButtons();
-});
-
-// ── Event Listeners ──
-document.getElementById('searchBtn').addEventListener('click', doSearch);
-document.getElementById('searchInput').addEventListener('keypress', e => {
-  if (e.key === 'Enter') doSearch();
-});
-
-// Initial state
-showHome();
+// Init
+renderCategories();
 </script>
 </body>
 </html>
