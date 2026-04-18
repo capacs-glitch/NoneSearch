@@ -312,8 +312,9 @@
     inset: 0;
     perspective: 1600px; 
     overflow: hidden; 
-    display: none;
+    display: none; /* Скрыт по умолчанию! */
     z-index: 10;
+    cursor: default;
   }
   .viewport.active { 
     display: flex; 
@@ -511,7 +512,7 @@
     <div class="search-grid" id="searchGrid"></div>
   </div>
 
-  <!-- 3D VIEWPORT (Player) -->
+  <!-- 3D VIEWPORT (Player) - Скрыт по умолчанию -->
   <div class="viewport" id="viewport">
     <div class="scene" id="scene">
       <div class="floor"></div>
@@ -543,7 +544,7 @@
       <div class="video-center paused" id="videoCenter">
         <div class="player-container" id="playerContainer">
           <div class="placeholder" id="placeholder">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"/></svg>
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"/></svg>
             <span style="font-size:13px; color:#888">Выберите видео для просмотра</span>
           </div>
         </div>
@@ -669,7 +670,7 @@ function showHome() {
   searchPage.classList.remove('active');
   viewport.classList.remove('active');
   searchInput.value = '';
-  renderCategories(); // Reload categories
+  renderCategories();
 }
 
 function showSearch() {
@@ -854,7 +855,6 @@ function loadVideo(item, relatedVideos = []) {
     resetCursorTimer();
     updatePanelsState();
     
-    // Load related videos
     renderList(relatedVideos, false);
   }
 }
@@ -947,24 +947,34 @@ muteBtn.addEventListener('click', () => {
 function updatePanelsState() {
   const paused = videoCenter.classList.contains('paused');
   if (paused) {
-    leftPanel.classList.add('visible'); rightPanel.classList.add('visible');
-    targetX = 0; targetY = 0; resetCamera();
+    leftPanel.classList.add('visible'); 
+    rightPanel.classList.add('visible');
+    targetX = 0; 
+    targetY = 0; 
+    resetCamera();
   } else {
-    leftPanel.classList.remove('visible'); rightPanel.classList.remove('visible');
+    leftPanel.classList.remove('visible'); 
+    rightPanel.classList.remove('visible');
   }
 }
 
 function resetCamera() {
-  curX = 0; curY = 0;
+  curX = 0; 
+  curY = 0;
   scene.style.transform = `rotateX(0deg) rotateY(0deg)`;
 }
 
+// ── Mouse tracking (ТОЛЬКО для плеера!) ──
 document.addEventListener('mousemove', e => {
+  // Работает ТОЛЬКО когда активен плеер
   if (!viewport.classList.contains('active')) return;
   
+  // Сброс таймера курсора при движении
   if (!videoCenter.classList.contains('paused') && !document.body.classList.contains('cinematic')) {
     resetCursorTimer();
   }
+  
+  // Параллакс работает ТОЛЬКО когда видео на паузе
   if (videoCenter.classList.contains('paused') && !document.body.classList.contains('cinematic')) {
     targetX = ((e.clientY / window.innerHeight) * 2 - 1) * 8;
     targetY = ((e.clientX / window.innerWidth) * 2 - 1) * 10;
@@ -973,7 +983,10 @@ document.addEventListener('mousemove', e => {
 
 let targetX = 0, targetY = 0, curX = 0, curY = 0;
 function animateParallax() {
-  if (viewport.classList.contains('active') && videoCenter.classList.contains('paused') && !document.body.classList.contains('cinematic')) {
+  // Параллакс работает ТОЛЬКО в активном плеере И только на паузе
+  if (viewport.classList.contains('active') && 
+      videoCenter.classList.contains('paused') && 
+      !document.body.classList.contains('cinematic')) {
     curX += (targetX - curX) * 0.08;
     curY += (targetY - curY) * 0.08;
     scene.style.transform = `rotateX(${-curX}deg) rotateY(${curY}deg)`;
