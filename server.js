@@ -6,12 +6,15 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: '*' }));
+// ✅ ВАЖНО: Разрешаем запросы с любого сайта (для GitHub Pages)
+app.use(cors({ origin: '*' })); 
 app.use(express.json());
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-// ─── YouTube Search ───
+// ... (остальной код поиска YouTube, Dailymotion, Rutube оставь без изменений) ...
+
+// YouTube Search
 async function searchYouTube(query) {
   if (!YOUTUBE_API_KEY) return [];
   try {
@@ -23,14 +26,14 @@ async function searchYouTube(query) {
       color: '#ff0033',
       title: item.snippet.title,
       thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
-      url: `https://youtube.com/watch?v=${item.id.videoId}`, // Важно: полная ссылка
+      url: `https://youtube.com/watch?v=${item.id.videoId}`,
       channel: item.snippet.channelTitle,
       views: ''
     }));
   } catch (e) { console.error('YT:', e.message); return []; }
 }
 
-// ─── Dailymotion Search ───
+// Dailymotion Search
 async function searchDailymotion(query) {
   try {
     const res = await axios.get('https://api.dailymotion.com/videos', {
@@ -41,14 +44,14 @@ async function searchDailymotion(query) {
       color: '#00aaff',
       title: video.title,
       thumbnail: video.thumbnail_url,
-      url: video.url, // Важна полная ссылка
+      url: video.url,
       channel: video.owner?.screenname || '',
       views: video.views_total ? `${Math.round(video.views_total / 1000)}K` : ''
     }));
   } catch (e) { console.error('DM:', e.message); return []; }
 }
 
-// ─── Rutube Search ───
+// Rutube Search
 async function searchRutube(query) {
   try {
     const res = await axios.get('https://rutube.ru/api/search/video/', {
@@ -60,7 +63,7 @@ async function searchRutube(query) {
       color: '#00a651',
       title: video.title || 'Без названия',
       thumbnail: video.thumbnail?.url || '',
-      url: `https://rutube.ru/video/${video.id}/`, // Важна полная ссылка
+      url: `https://rutube.ru/video/${video.id}/`,
       channel: video.author?.name || '',
       views: video.views ? `${video.views} просмотров` : ''
     }));
