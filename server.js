@@ -7,7 +7,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ✅ ВАЖНО: Разрешаем запросы с любого сайта (для GitHub Pages)
-app.use(cors({ origin: '*' })); 
+app.use(cors({ 
+  origin: '*',  // Разрешить ВСЕ домены (для разработки)
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
